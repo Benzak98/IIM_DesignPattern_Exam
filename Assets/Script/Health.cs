@@ -12,6 +12,8 @@ public class Health : MonoBehaviour, IHealth
     [SerializeField] int _maxHealth;
     [SerializeField] UnityEvent _onDeath;
 
+    public bool _ShieldOn;
+
     // Propriétés
     public int CurrentHealth { get; private set; }
     public int MaxHealth => _maxHealth;
@@ -20,6 +22,7 @@ public class Health : MonoBehaviour, IHealth
     // Events
     public event UnityAction OnSpawn;
     public event UnityAction<int> OnDamage;
+    public event UnityAction UpdateSlider;
     public event UnityAction OnDeath { add => _onDeath.AddListener(value); remove => _onDeath.RemoveListener(value); }
 
     // Methods
@@ -33,6 +36,9 @@ public class Health : MonoBehaviour, IHealth
 
     public void TakeDamage(int amount)
     {
+        if (_ShieldOn)
+            return;
+
         if (amount < 0) throw new ArgumentException($"Argument amount {nameof(amount)} is negativ");
 
         var tmp = CurrentHealth;
@@ -44,7 +50,18 @@ public class Health : MonoBehaviour, IHealth
         {
             _onDeath?.Invoke();
         }
+        UpdateSlider?.Invoke();
+    }
 
+    public void TakePopo(int amount)
+    {
+        if (amount < 0) throw new ArgumentException($"Argument amount {nameof(amount)} is negativ");
+
+        if (CurrentHealth <= MaxHealth)
+            CurrentHealth += amount;
+        CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth);
+
+        UpdateSlider?.Invoke();
     }
 
     [Button("test")]

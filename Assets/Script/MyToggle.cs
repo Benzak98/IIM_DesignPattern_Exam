@@ -9,10 +9,24 @@ public class MyToggle : MonoBehaviour, ITouchable
     [SerializeField] UnityEvent _onToggleOn;
     [SerializeField] UnityEvent _onToggleOff;
 
+    [SerializeField] SpriteRenderer renderer;
+
     public bool IsActive { get; private set; }
 
     public void Touch(int power)
     {
         IsActive = !IsActive;
+
+        if (IsActive)
+        {
+            renderer.color = Color.blue;
+            _onToggleOn?.Invoke();
+        }
+        else
+        {
+            renderer.color = Color.red;
+            _onToggleOff?.Invoke();
+        }
     }
+
 }

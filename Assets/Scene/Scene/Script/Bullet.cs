@@ -9,6 +9,7 @@ public class Bullet : MonoBehaviour
     [SerializeField] Rigidbody2D _rb;
     [SerializeField] float _speed;
     [SerializeField] float _collisionCooldown = 0.5f;
+    public BulletPool bulletPool;
 
     public Vector3 Direction { get; private set; }
     public int Power { get; private set; }
@@ -36,15 +37,31 @@ public class Bullet : MonoBehaviour
     {
         if (Time.fixedTime < LaunchTime + _collisionCooldown) return;
 
-        collision.GetComponent<IHealth>()?.TakeDamage(Power);
-        Destroy(gameObject);
+        if (collision.TryGetComponent<IHealth>(out IHealth health))
+        {
+            health?.TakeDamage(Power);
+            bulletPool.ReceiveBullet(this);
+        }
+        else if (collision.TryGetComponent<ITouchable>(out ITouchable touchable))
+        {
+            bulletPool.ReceiveBullet(this);
+            touchable.Touch(1);
+        }
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (Time.fixedTime < LaunchTime + _collisionCooldown) return;
 
-        collision.collider.GetComponent<IHealth>()?.TakeDamage(Power);
-        Destroy(gameObject);
+        if (collision.collider.TryGetComponent<IHealth>(out IHealth health))
+        {
+            health?.TakeDamage(Power);
+            bulletPool.ReceiveBullet(this);
+        }
+        else if (collision.collider.TryGetComponent<ITouchable>(out ITouchable touchable))
+        {
+            bulletPool.ReceiveBullet(this);
+            touchable.Touch(1);
+        }
     }
 
     private void Health_OnDamage(int arg0)

@@ -12,6 +12,7 @@ public interface IHealth
 
     event UnityAction OnSpawn;
     event UnityAction<int> OnDamage;
+    event UnityAction UpdateSlider;
     event UnityAction OnDeath;
 
     void TakeDamage(int amount);

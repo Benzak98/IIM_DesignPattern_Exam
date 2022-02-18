@@ -10,10 +10,12 @@ public class PlayerInputDispatcher : MonoBehaviour
 
     [SerializeField] EntityMovement _movement;
     [SerializeField] EntityFire _fire;
+    [SerializeField] Health _health;
 
     [SerializeField] InputActionReference _pointerPosition;
     [SerializeField] InputActionReference _moveJoystick;
     [SerializeField] InputActionReference _fireButton;
+    [SerializeField] InputActionReference _shieldButton;
 
     Coroutine MovementTracking { get; set; }
 
@@ -23,6 +25,8 @@ public class PlayerInputDispatcher : MonoBehaviour
     {
         // binding
         _fireButton.action.started += FireInput;
+        _shieldButton.action.started += ShieldInput;
+        _shieldButton.action.canceled += ShieldEnd;
 
         _moveJoystick.action.started += MoveInput;
         _moveJoystick.action.canceled += MoveInputCancel;
@@ -31,9 +35,31 @@ public class PlayerInputDispatcher : MonoBehaviour
     private void OnDestroy()
     {
         _fireButton.action.started -= FireInput;
-
         _moveJoystick.action.started -= MoveInput;
         _moveJoystick.action.canceled -= MoveInputCancel;
+
+        _shieldButton.action.started -= ShieldInput;
+        _shieldButton.action.canceled -= ShieldEnd;
+    }
+
+    private void ShieldInput(InputAction.CallbackContext obj)
+    {
+        float health = obj.ReadValue<float>();
+        if (health == 1)
+        {
+            _fire.canFire = false;
+            _health._ShieldOn = true;
+        }
+    }
+
+    private void ShieldEnd(InputAction.CallbackContext obj)
+    {
+        float health = obj.ReadValue<float>();
+        if (health == 0)
+        {
+            _fire.canFire = true;
+            _health._ShieldOn = false;
+        }
     }
 
     private void MoveInput(InputAction.CallbackContext obj)
